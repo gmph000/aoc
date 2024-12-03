@@ -11,6 +11,7 @@ const TEST_INPUT: &str = r#"7 6 4 2 1
 8 6 4 4 1
 1 3 6 7 9"#;
 
+// Boilerplate to decide whether to run part one or two.
 pub fn run(which: WhichPuzzle, use_test_input: bool) -> i32 {
     let input;
     if use_test_input {
@@ -25,55 +26,93 @@ pub fn run(which: WhichPuzzle, use_test_input: bool) -> i32 {
     }
 }
 
+// Part one solution.
 fn run_one(input: &str) -> i32 {
-    let mut safety_list: Vec<bool> = vec![];
+    let mut safe_count = 0;
 
     for line in input.lines() {
-        let nums: Vec<i32> = line
-            .split_whitespace()
-            .map(|num| string_to_i32(num))
-            .collect::<Vec<_>>();
+        let nums: Vec<i32> = convert_line_to_nums_vector(&line);
 
-        let mut safe = true;
-        let mut asc: Option<bool> = None;
-        for i in 0..(nums.len() - 1) {
-            let diff = nums[i + 1] - nums[i];
+        if check_if_safe(&nums) {
+            safe_count += 1;
+        }
+    }
 
-            // Check if the difference is between 1 and 3.
-            if diff.abs() < 1 || diff.abs() > 3 {
+    safe_count
+}
+
+// Part two solution.
+fn run_two(input: &str) -> i32 {
+    let mut safe_count = 0;
+
+    for line in input.lines() {
+        let nums: Vec<i32> = convert_line_to_nums_vector(&line);
+
+        if check_if_safe(&nums) {
+            safe_count += 1;
+        } else {
+            if check_if_safe_after_removing_one(&nums) {
+                safe_count += 1;
+            }
+        }
+    }
+
+    safe_count
+}
+
+// Convert "1 2 4 7" to [1, 2, 4, 7].
+fn convert_line_to_nums_vector(nums: &str) -> Vec<i32> {
+    nums.split_whitespace()
+        .map(|num| string_to_i32(num))
+        .collect::<Vec<_>>()
+}
+
+fn check_if_safe(nums: &Vec<i32>) -> bool {
+    let mut safe = true;
+    let mut asc: Option<bool> = None;
+
+    // Compare each number to the number in front of it.
+    for i in 0..nums.len() - 1 {
+        let diff = nums[i + 1] - nums[i];
+
+        // Check if the difference is between 1 and 3.
+        if diff.abs() < 1 || diff.abs() > 3 {
+            safe = false;
+            break;
+        }
+
+        // Check if the value is consistently ascending or descending.
+        if diff > 0 {
+            if asc.is_none() {
+                asc = Some(true);
+            } else if asc.unwrap() == false {
                 safe = false;
                 break;
             }
-
-            // Check if the value is consistently ascending or descending.
-            if diff > 0 {
-                if asc.is_none() {
-                    asc = Some(true);
-                } else if asc.unwrap() == false {
-                    safe = false;
-                    break;
-                }
-            } else if diff < 0 {
-                if asc.is_none() {
-                    asc = Some(false);
-                } else if asc.unwrap() == true {
-                    safe = false;
-                    break;
-                }
+        } else if diff < 0 {
+            if asc.is_none() {
+                asc = Some(false);
+            } else if asc.unwrap() == true {
+                safe = false;
+                break;
             }
         }
-
-        safety_list.push(safe);
     }
 
-    safety_list
-        .iter()
-        .filter(|x| **x == true)
-        .count()
-        .try_into()
-        .expect("Could not convert isize to i32")
+    safe
 }
 
-fn run_two(_input: &str) -> i32 {
-    0
+// Naively try removing one item at a time until the sequence is safe,
+// or give up after trying all possibilities.
+fn check_if_safe_after_removing_one(nums: &Vec<i32>) -> bool {
+    for i in 0..nums.len() {
+        let mut nums_filtered = nums.clone();
+        nums_filtered.remove(i);
+
+        if check_if_safe(&nums_filtered) {
+            return true;
+        }
+    }
+
+    false
 }
