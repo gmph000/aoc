@@ -17,7 +17,7 @@ enum Direction {
     Unset,
 }
 
-// Boilerplate to decide whether to run part one or two.
+// Boilerplate to decide whether to run part one or two and which input to use.
 pub fn run(which: WhichPuzzle, use_test_input: bool) -> i32 {
     let input;
     if use_test_input {
