@@ -11,6 +11,12 @@ const TEST_INPUT: &str = r#"7 6 4 2 1
 8 6 4 4 1
 1 3 6 7 9"#;
 
+enum Direction {
+    Asc,
+    Desc,
+    Unset,
+}
+
 // Boilerplate to decide whether to run part one or two.
 pub fn run(which: WhichPuzzle, use_test_input: bool) -> i32 {
     let input;
@@ -60,16 +66,16 @@ fn run_two(input: &str) -> i32 {
     safe_count
 }
 
-// Convert "1 2 4 7" to [1, 2, 4, 7].
+/// Convert `"1 2 4 7"` to `vec![1, 2, 4, 7]`.
 fn convert_line_to_nums_vector(nums: &str) -> Vec<i32> {
     nums.split_whitespace()
         .map(|num| string_to_i32(num))
         .collect::<Vec<_>>()
 }
 
+/// Checks the array based on the rules, and returns `true` if safe, `false` if unsafe.
 fn check_if_safe(nums: &Vec<i32>) -> bool {
-    let mut safe = true;
-    let mut asc: Option<bool> = None;
+    let mut dir = Direction::Unset;
 
     // Compare each number to the number in front of it.
     for i in 0..nums.len() - 1 {
@@ -77,33 +83,30 @@ fn check_if_safe(nums: &Vec<i32>) -> bool {
 
         // Check if the difference is between 1 and 3.
         if diff.abs() < 1 || diff.abs() > 3 {
-            safe = false;
-            break;
+            return false;
         }
 
         // Check if the value is consistently ascending or descending.
         if diff > 0 {
-            if asc.is_none() {
-                asc = Some(true);
-            } else if asc.unwrap() == false {
-                safe = false;
-                break;
+            match dir {
+                Direction::Desc => return false,
+                Direction::Unset => dir = Direction::Asc,
+                _ => {}
             }
         } else if diff < 0 {
-            if asc.is_none() {
-                asc = Some(false);
-            } else if asc.unwrap() == true {
-                safe = false;
-                break;
+            match dir {
+                Direction::Asc => return false,
+                Direction::Unset => dir = Direction::Desc,
+                _ => {}
             }
         }
     }
 
-    safe
+    true
 }
 
-// Naively try removing one item at a time until the sequence is safe,
-// or give up after trying all possibilities.
+/// Naively try removing one item at a time until the sequence is safe,
+/// or give up after trying all possibilities.
 fn check_if_safe_after_removing_one(nums: &Vec<i32>) -> bool {
     for i in 0..nums.len() {
         let mut nums_filtered = nums.clone();
