@@ -5,13 +5,18 @@ use regex::Regex;
 mod tests;
 
 const INPUT_FILE_PATH: &str = "src/days/day3/input3.txt";
-const TEST_INPUT: &str =
+const TEST_INPUT_1: &str =
     r#"xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))"#;
+const TEST_INPUT_2: &str =
+    r#"xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"#;
 
 pub fn run(which: WhichPuzzle, use_test_input: bool) -> i32 {
     let input;
     if use_test_input {
-        input = String::from(TEST_INPUT);
+        input = match which {
+            WhichPuzzle::First => String::from(TEST_INPUT_1),
+            WhichPuzzle::Second => String::from(TEST_INPUT_2),
+        }
     } else {
         input = file_reader::read_file(INPUT_FILE_PATH);
     }
@@ -39,6 +44,31 @@ fn run_one(input: &str) -> i32 {
     sum
 }
 
-fn run_two(_input: &str) -> i32 {
-    0
+fn run_two(input: &str) -> i32 {
+    let mut sum = 0;
+
+    // Find all sections that turn off `mul()`.
+    let mut sections = input.split("don't()").collect::<Vec<_>>();
+
+    // If the first word of the input is not "don't()", then the first section is the only
+    // one where it starts with `mul()` enabled. Add it to the enabled_sections vec and then
+    // remove it from the vec.
+    let first_index_of_dont = input.find("don't()");
+    if first_index_of_dont.unwrap_or(0) > 1 {
+        let first_section = sections.get(0).expect("First element did not exist");
+        sum += run_one(first_section);
+        sections.remove(0);
+    }
+
+    // In each section where mul() is turned off, find the first do(),
+    // and use everything after it as a "mul enabled" section.
+    for section in &sections {
+        let split = section.split_once("do()");
+        match split {
+            Some((_, on_section)) => sum += run_one(&on_section),
+            _ => {}
+        }
+    }
+
+    sum
 }
