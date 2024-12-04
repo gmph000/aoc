@@ -4,6 +4,9 @@ use super::*;
 fn solves_day3_1() {
     assert_eq!(run(WhichPuzzle::First, true), 161);
     assert_eq!(run(WhichPuzzle::First, false), 166357705);
+
+    assert_eq!(run_one(""), 0);
+    assert_eq!(run_one("bogus"), 0);
 }
 
 #[test]

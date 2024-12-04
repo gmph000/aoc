@@ -28,17 +28,11 @@ pub fn run(which: WhichPuzzle, use_test_input: bool) -> i32 {
 }
 
 fn run_one(input: &str) -> i32 {
-    let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
-
-    let mut muls: Vec<(i32, i32)> = vec![];
-    for (_, [left_operand, right_operand]) in re.captures_iter(input).map(|c| c.extract()) {
-        muls.push((string_to_i32(left_operand), string_to_i32(right_operand)));
-    }
-
     let mut sum = 0;
 
-    for pair in muls {
-        sum += pair.0 * pair.1;
+    let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
+    for (_, [left_operand, right_operand]) in re.captures_iter(input).map(|c| c.extract()) {
+        sum += string_to_i32(left_operand) * string_to_i32(right_operand);
     }
 
     sum
@@ -47,12 +41,12 @@ fn run_one(input: &str) -> i32 {
 fn run_two(input: &str) -> i32 {
     let mut sum = 0;
 
-    // Find all sections that turn off `mul()`.
+    // Split on `don't()` to find all sections where `mul()` begins as disabled.
     let mut sections = input.split("don't()").collect::<Vec<_>>();
 
     // If the first word of the input is not "don't()", then the first section is the only
-    // one where it starts with `mul()` enabled. Add it to the enabled_sections vec and then
-    // remove it from the vec.
+    // one where it starts with `mul()` enabled. Calculate any muls in it and then remove it
+    // from the vec.
     let first_index_of_dont = input.find("don't()");
     if first_index_of_dont.unwrap_or(0) > 1 {
         let first_section = sections.get(0).expect("First element did not exist");
@@ -60,11 +54,10 @@ fn run_two(input: &str) -> i32 {
         sections.remove(0);
     }
 
-    // In each section where mul() is turned off, find the first do(),
+    // In each section where mul() is disabled, find the first do(),
     // and use everything after it as a "mul enabled" section.
     for section in &sections {
-        let split = section.split_once("do()");
-        match split {
+        match section.split_once("do()") {
             Some((_, on_section)) => sum += run_one(&on_section),
             _ => {}
         }
