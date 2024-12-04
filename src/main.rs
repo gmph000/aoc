@@ -9,6 +9,9 @@ mod day1;
 #[path = "days/day2/day2.rs"]
 mod day2;
 
+#[path = "days/day3/day3.rs"]
+mod day3;
+
 mod file_reader;
 mod helper;
 
@@ -57,6 +60,7 @@ fn main() {
     let answer = match puzzle_major {
         "1" => day1::run(puzzle_minor, use_test_input),
         "2" => day2::run(puzzle_minor, use_test_input),
+        "3" => day3::run(puzzle_minor, use_test_input),
         _ => {
             eprintln!("Puzzle not found");
             process::exit(1);
