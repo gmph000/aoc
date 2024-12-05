@@ -5,6 +5,10 @@ pub fn string_to_i32(s: &str) -> i32 {
     i32::from_str_radix(s, 10).expect(&format!("Could not convert {} to a number.", s))
 }
 
+// pub fn string_to_usize(s: &str) -> usize {
+//     usize::from_str_radix(s, 10).expect(&format!("Could not convert {} to a usize.", s))
+// }
+
 #[path = "helper_tests.rs"]
 #[cfg(test)]
 mod helper_tests;

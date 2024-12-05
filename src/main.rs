@@ -15,6 +15,9 @@ mod day3;
 #[path = "days/day4/day4.rs"]
 mod day4;
 
+#[path = "days/day5/day5.rs"]
+mod day5;
+
 mod file_reader;
 mod helper;
 
@@ -65,6 +68,7 @@ fn main() {
         "2" => day2::run(puzzle_minor, use_test_input),
         "3" => day3::run(puzzle_minor, use_test_input),
         "4" => day4::run(puzzle_minor, use_test_input),
+        "5" => day5::run(puzzle_minor, use_test_input),
         _ => {
             eprintln!("Puzzle not found");
             process::exit(1);
