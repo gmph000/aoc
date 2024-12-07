@@ -54,13 +54,18 @@ fn run_one(input: &str) -> i32 {
 
     let mut sum = 0;
 
-    for line in updates.lines().collect::<Vec<_>>() {
-        let nums = line.split(",").collect::<Vec<_>>();
+    for update in updates.lines().collect::<Vec<_>>() {
+        let nums = update.split(",").collect::<Vec<_>>();
         let mut correct = true;
 
+        // Check each update by running through all the rules.
         for rule in rules.lines().collect::<Vec<_>>() {
             let (before, after) = rule.split_once("|").expect("Pipe split failed");
 
+            // Find the index of both elements in a rule. If they both exist,
+            // then make sure the index of the "before" part of the rule is less
+            // than the index of the "after" part of the rule.
+            // If either do not exist, continue to the next rule.
             let before_index = nums.iter().position(|x| *x == before);
             let after_index = nums.iter().position(|x| *x == after);
 
@@ -85,7 +90,52 @@ fn run_one(input: &str) -> i32 {
 
 // Part two solution.
 fn run_two(input: &str) -> i32 {
-    0
+    let (rules, updates) = input.split_once("\n\n").unwrap();
+
+    let mut sum = 0;
+
+    for update in updates.lines().collect::<Vec<_>>() {
+        let mut nums = update.split(",").collect::<Vec<_>>();
+        let mut correct = true;
+
+        'all_rules: loop {
+            // Check each update by running through all the rules.
+            for rule in rules.lines().collect::<Vec<_>>() {
+                let (before, after) = rule.split_once("|").expect("Pipe split failed");
+
+                // Find the index of both elements in a rule. If they both exist,
+                // then make sure the index of the "before" part of the rule is less
+                // than the index of the "after" part of the rule.
+                // If either do not exist, continue to the next rule.
+                let before_index = nums.iter().position(|x| *x == before);
+                let after_index = nums.iter().position(|x| *x == after);
+
+                match (before_index, after_index) {
+                    (Some(before_index), Some(after_index)) => {
+                        // If the rule failed, swap the nodes that were out of order
+                        // and retry all the rules. Keep doing this until no rules fail.
+                        // I'm not sure if it's a fluke that this works. Seems like a sorted
+                        // dependency graph would be more correct.
+                        if before_index > after_index {
+                            nums.swap(before_index, after_index);
+                            correct = false;
+                            continue 'all_rules;
+                        }
+                    }
+                    _ => {}
+                }
+            }
+
+            // If no rules failed, break out of 'all_rules.
+            break;
+        }
+
+        if !correct {
+            sum += find_middle_number(&nums);
+        }
+    }
+
+    sum
 }
 
 fn find_middle_number(nums: &Vec<&str>) -> i32 {
