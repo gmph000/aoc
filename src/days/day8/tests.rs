@@ -8,6 +8,6 @@ fn solves_day8_1() {
 
 #[test]
 fn solves_day8_2() {
-    assert_eq!(run(WhichPuzzle::Second, true), 0);
-    assert_eq!(run(WhichPuzzle::Second, false), 0);
+    assert_eq!(run(WhichPuzzle::Second, true), 34);
+    assert_eq!(run(WhichPuzzle::Second, false), 766);
 }

@@ -121,5 +121,61 @@ fn find_match_locs(
 
 // Part two solution.
 fn run_two(input: &str) -> i32 {
-    0
+    let map = input
+        .lines()
+        .map(|l| l.chars().collect::<Vec<_>>())
+        .collect::<Vec<_>>();
+
+    let mut antinodes_map = vec![vec![0; map[0].len()]; map.len()];
+
+    for y in 0..map.len() {
+        for x in 0..map[0].len() {
+            let letter = map[y][x];
+
+            if letter != '.' {
+                antinodes_map[y][x] = 1;
+
+                let matches = find_match_locs(&letter, &map, x, y);
+                'outer: for m in matches {
+                    let x = i32::try_from(x).expect("could not convert");
+                    let y = i32::try_from(y).expect("could not convert");
+                    let mut match_x = m.x;
+                    let mut match_y = m.y;
+
+                    loop {
+                        if x < match_x || y < match_y {
+                            continue 'outer;
+                        }
+
+                        let anti_x = x - match_x;
+                        let anti_y = y - match_y;
+
+                        if anti_x >= map[0].len().try_into().expect("")
+                            || anti_y >= map.len().try_into().expect("")
+                        {
+                            continue 'outer;
+                        }
+
+                        antinodes_map[usize::try_from(anti_y).expect("")]
+                            [usize::try_from(anti_x).expect("")] = 1;
+
+                        match_x += m.x;
+                        match_y += m.y;
+                    }
+                }
+            }
+        }
+    }
+
+    let mut total_antinodes = 0;
+
+    for y in 0..antinodes_map.len() {
+        for x in 0..antinodes_map[0].len() {
+            if antinodes_map[y][x] == 1 {
+                total_antinodes += 1;
+            }
+        }
+    }
+
+    total_antinodes
 }
